@@ -1,9 +1,9 @@
 # Stage 1
 FROM node:14-alpine as build-stage
 WORKDIR /app
-COPY package.json /app
+COPY webapp/package.json /app
 RUN npm install
-COPY . /app
+COPY webapp /app
 RUN npm run build
 
 # Stage 2

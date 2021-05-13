@@ -22,7 +22,7 @@ Docker environment as described below. Otherwise, you can ignore these steps.
 1. Install [Sysbox](https://github.com/nestybox/sysbox) container runtime:
 
     ```bash
-    ./scripts/sysbox-install.sh
+    ./config/sysbox-install.sh
     ```
 
     See [Easy Jenkins with a System Container](https://blog.nestybox.com/2019/09/29/jenkins.html)
@@ -33,7 +33,7 @@ Docker environment as described below. Otherwise, you can ignore these steps.
 runtime:
 
     ```bash
-    docker build -t jenkins-sysbox jenkins
+    docker build -t jenkins-sysbox config/jenkins
     ```
 
 3. Run Jenkins:
