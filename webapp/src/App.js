@@ -9,6 +9,7 @@ function App() {
         <p>
           Hello World!
         </p>
+        <p>Deployed by Jenkins</p>
         <a
           className="App-link"
           href="https://reactjs.org"
