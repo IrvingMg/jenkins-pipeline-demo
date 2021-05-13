@@ -3,12 +3,12 @@
 This project is a demo for a multibranch pipeline on Jenkins. The demo
 implements two Jenkins pipelines, `build-pipeline` and `deploy-pipeline`,
 and together compose the whole CI/CD process of four stages for a web
-application: `build`, `test`, `containerize` and `deploy`.
+application: build, test, containerize and deploy.
 
 Each pipeline is triggered by different events:
 
 - `build-pipeline`: It's triggered when a Pull Request is opened for any branch.
-This event runs only the first two stages of the CI/CD process before allowing
+This event runs the first three stages of the CI/CD process before allowing
 to merge a branch.
 
 - `deploy-pipeline`: It's triggered when merging any branch into `development`.

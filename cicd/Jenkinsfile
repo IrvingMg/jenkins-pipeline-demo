@@ -26,7 +26,20 @@ pipeline {
             }
         }
 
-        stage('Stage 3. Containerize') {
+        stage('Stage 3. Containerize - Build') {
+            agent {
+                docker {
+                    image 'docker'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+
+            steps {
+                    sh './cicd/scripts/containerize-stage-build.sh'
+            }
+        }
+
+        stage('Stage 3. Containerize - Push') {
             when {
                 branch 'development'
             }
@@ -45,10 +58,9 @@ pipeline {
                         usernameVariable: 'REGISTRY_USERNAME', 
                         passwordVariable: 'REGISTRY_PASSWORD'
                     ]]) {
-                    sh './cicd/scripts/containerize-stage.sh'
+                    sh './cicd/scripts/containerize-stage-push.sh'
                 }
             }
-            
         }
 
         stage('Stage 4. Deploy') {
@@ -80,7 +92,6 @@ pipeline {
                     BUILD_ID=$BUILD_ID \
                     ./deploy-stage.sh'
                 }
-
             }
 
         }
