@@ -1,0 +1,90 @@
+pipeline {
+    agent any
+
+    environment {
+        CI = 'true'
+    }
+
+    stages {
+        stage('Stage 1. Build') {
+            agent {
+                docker { image 'node:14-alpine' }
+            }
+
+            steps {
+                sh './cicd/scripts/build-stage.sh'
+            }
+        }
+
+        stage('Stage 2. Test') {
+            agent {
+                docker { image 'node:14-alpine' }
+            }
+
+            steps {
+                sh './cicd/scripts/test-stage.sh'
+            }
+        }
+
+        stage('Stage 3. Containerize') {
+            when {
+                branch 'development'
+            }
+
+            agent {
+                docker {
+                    image 'docker'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+
+            steps {
+                withCredentials([[
+                        $class: 'UsernamePasswordMultiBinding', 
+                        credentialsId:'Docker Hub', 
+                        usernameVariable: 'REGISTRY_USERNAME', 
+                        passwordVariable: 'REGISTRY_PASSWORD'
+                    ]]) {
+                    sh './cicd/scripts/containerize-stage.sh'
+                }
+            }
+            
+        }
+
+        stage('Stage 4. Deploy') {
+            when {
+                branch 'development'
+            }
+
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'SSH-Development', 
+                        keyFileVariable: 'SSH_KEY'),
+                    [
+                        $class: 'UsernamePasswordMultiBinding', 
+                        credentialsId:'Docker Hub', 
+                        usernameVariable: 'REGISTRY_USERNAME', 
+                        passwordVariable: 'REGISTRY_PASSWORD'
+                    ]
+                ]) {
+                    sh 'scp -v -i $SSH_KEY \
+                    -o StrictHostKeyChecking=no \
+                    ./cicd/scripts/deploy-stage.sh \
+                    jenkins@$SSH_DEV_SERVER:~'
+
+                    sh 'ssh -i $SSH_KEY \
+                    jenkins@$SSH_DEV_SERVER \
+                    REGISTRY_USERNAME=$REGISTRY_USERNAME \
+                    REGISTRY_PASSWORD=$REGISTRY_PASSWORD \
+                    BUILD_ID=$BUILD_ID \
+                    ./deploy-stage.sh'
+                }
+
+            }
+
+        }
+
+    }
+
+}
